@@ -77,6 +77,67 @@ int SSD1306DisplayInterfaceI2C::reset()
     return 0;
 }
 
+SSD1306DisplayInterfaceSPI::SSD1306DisplayInterfaceSPI(PinName mosi, PinName sclk, PinName ssel, PinName dc_pin, PinName reset_pin)
+    : _cleanup_flag(true)
+    , _dc_pin(dc_pin, 1)
+    , _reset_pin(reset_pin, 1)
+{
+    MBED_ASSERT(dc_pin != NC);
+    _spi = new SPI(mosi, NC, sclk, ssel);
+    _spi->frequency(_SPI_FREQ);
+    _spi->format(8, 0);
+}
+
+SSD1306DisplayInterfaceSPI::SSD1306DisplayInterfaceSPI(SPI *spi, PinName dc_pin, PinName reset_pin)
+    : _spi(spi)
+    , _cleanup_flag(false)
+    , _dc_pin(dc_pin, 1)
+    , _reset_pin(reset_pin, 1)
+{
+    MBED_ASSERT(dc_pin != NC);
+}
+
+SSD1306DisplayInterfaceSPI::~SSD1306DisplayInterfaceSPI()
+{
+    if (_cleanup_flag) {
+        delete _spi;
+    }
+}
+
+int SSD1306DisplayInterfaceSPI::write_command_data(const uint8_t *buf, size_t len)
+{
+    int total;
+    _spi->select();
+    _dc_pin = 0;
+    total = _spi->write((const char *)buf, len, nullptr, 0);
+    _dc_pin = 1;
+    _spi->deselect();
+    return total == len ? 0 : -1;
+}
+
+int SSD1306DisplayInterfaceSPI::write_gram_data(const uint8_t *buf, size_t len)
+{
+    int total;
+    _spi->select();
+    _dc_pin = 1;
+    total = _spi->write((const char *)buf, len, nullptr, 0);
+    _spi->deselect();
+    return total == len ? 0 : -1;
+}
+
+int SSD1306DisplayInterfaceSPI::reset()
+{
+    if (_reset_pin.is_connected()) {
+        // as this function isn't called frequently, initialize pin dynamically to save memory
+        _reset_pin = 1;
+        ThisThread::sleep_for(1ms);
+        _reset_pin = 0;
+        ThisThread::sleep_for(10ms);
+        _reset_pin = 1;
+    }
+    return 0;
+}
+
 SSD1306DisplayDriver::SSD1306DisplayDriver(SSD1306DisplayInterface *interface, uint8_t width, uint8_t height, SSD1306DisplayDriver::VCCMode vcc_mode, SSD1306DisplayDriver::CompinLayout compin_layout)
     : _interface(interface)
     , _width(width)
@@ -88,6 +149,16 @@ SSD1306DisplayDriver::SSD1306DisplayDriver(SSD1306DisplayInterface *interface, u
 
 SSD1306DisplayDriver::~SSD1306DisplayDriver()
 {
+}
+
+int SSD1306DisplayDriver::get_width() const
+{
+    return _width;
+}
+
+int SSD1306DisplayDriver::get_heigth() const
+{
+    return _height;
 }
 
 int SSD1306DisplayDriver::init(bool start)
@@ -241,7 +312,7 @@ int SSD1306DisplayDriver::draw_bitmap(uint8_t start_col, uint8_t end_col, uint8_
     }
 
     // write graphic data
-    size_t data_len = (start_col - end_col + 1) * (start_page - end_page + 1);
+    size_t data_len = (end_col - start_col + 1) * (end_page - start_page + 1);
     err = _interface->write_gram_data(data, data_len);
     if (err) {
         _last_region = 0;

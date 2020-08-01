@@ -87,6 +87,49 @@ public:
 };
 
 /**
+ * SPI 4 wire for SSD1306 display.
+ */
+class SSD1306DisplayInterfaceSPI : public SSD1306DisplayInterface {
+private:
+    SPI *_spi;
+    bool _cleanup_flag;
+    DigitalOut _reset_pin;
+    // note: keep 1 as default dc pin value
+    DigitalOut _dc_pin;
+
+    static const int _SPI_FREQ = 8'000'000;
+
+public:
+    /**
+     * Constructor.
+     *
+     * @param mosi MOSI SPI pin (note: MISO pin isn't used). It's connected to D1 pin of SSD1306
+     * @param sclk SCLK SPI pin. It's connected to D0 pin of SSD1306
+     * @param ssel SPI chip selection pin
+     * @param dc_pin digital output pin that is connected to D/C# pin of SSD1306
+     * @param reset_pin digital output pin that is connected to reset pin of SSD1306 (optional)
+     */
+    SSD1306DisplayInterfaceSPI(PinName mosi, PinName sclk, PinName ssel, PinName dc_pin, PinName reset_pin = NC);
+
+    /**
+     * Constructor.
+     *
+     * @param spi SPI interface
+     * @param dc_pin digital output pin that is connected to D/C# pin of SSD1306
+     * @param reset_pin digital output pin that is connected to reset pin of SSD1306 (optional)
+     */
+    SSD1306DisplayInterfaceSPI(SPI *spi, PinName dc_pin, PinName reset_pin = NC);
+
+    ~SSD1306DisplayInterfaceSPI();
+
+public:
+    // SSD1306DisplayInterface interface
+    int write_command_data(const uint8_t *buf, size_t len);
+    int write_gram_data(const uint8_t *buf, size_t len);
+    int reset();
+};
+
+/**
  * SSD1306 driver,
  */
 class SSD1306DisplayDriver : private NonCopyable<SSD1306DisplayDriver> {
@@ -112,8 +155,8 @@ public:
 
     enum CompinLayout : uint8_t {
         COMPINLAYOUT_SN = 0x02, // sequential layout, normal left-rigth layout
-        COMPINLAYOUT_SI = 0x12, // sequential layout, inversed left-rigth layout
-        COMPINLAYOUT_AN = 0x22, // alternate layout, normal left-rigth layout
+        COMPINLAYOUT_SI = 0x22, // sequential layout, inversed left-rigth layout
+        COMPINLAYOUT_AN = 0x12, // alternate layout, normal left-rigth layout
         COMPINLAYOUT_AI = 0x32, // alternate layout, inversed left-rigth layout
     };
 
@@ -134,6 +177,9 @@ public:
     SSD1306DisplayDriver(SSD1306DisplayInterface *interface, uint8_t width, uint8_t height, VCCMode vcc_mode = VCC_INTERNAL, CompinLayout compin_layout = COMPINLAYOUT_SN);
 
     ~SSD1306DisplayDriver();
+
+    int get_width() const;
+    int get_heigth() const;
 
     /**
      * Initialize display.

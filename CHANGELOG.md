@@ -10,3 +10,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add base SSD1306 driver
 - Add I2C wrapper for SSD1306 driver
+- Add SPI wrapper for SSD1306 driver

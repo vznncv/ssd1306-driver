@@ -9,10 +9,7 @@ The driver only provides API to flush data from a buffer to a specified display 
 
 The interface should be drawn with some external libraries like [littelvgl](https://littlevgl.com/) and others.
 
-Note: current implementation support only I2C displays.
-
-TODO: add support of the SPI interface.
-
+Display usage examples can be found in the `examples` folder.
 
 ### Mbed OS version support
 
