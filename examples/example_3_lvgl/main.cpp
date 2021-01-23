@@ -1,5 +1,5 @@
 /**
- * Example of I2C 128x32 OLED display usage with LittlevGL.
+ * Example of I2C 128x32 OLED display usage with LVGL.
  */
 #include "mbed.h"
 #include "ssd1306_driver.h"
@@ -17,9 +17,9 @@ using namespace ssd1306driver;
 
 static DigitalOut user_led(LED1);
 
-static SSD1306DisplayInterfaceI2C display_interafce(DISPLAY_I2C_SDA_PIN, DISPLAY_I2C_SCL_PIN);
-static SSD1306DisplayDriver display_dirver(&display_interafce, DISPLAY_WIDTH, DISPLAY_HEIGHT, SSD1306DisplayDriver::VCC_INTERNAL, DISPLAY_COMPIN_LAYOUT);
-static SSD1306LVGLDisplay lvgl_display(&display_dirver);
+static SSD1306DisplayInterfaceI2C display_interface(DISPLAY_I2C_SDA_PIN, DISPLAY_I2C_SCL_PIN);
+static SSD1306DisplayDriver display_driver(&display_interface, DISPLAY_WIDTH, DISPLAY_HEIGHT, SSD1306DisplayDriver::VCC_INTERNAL, DISPLAY_COMPIN_LAYOUT);
+static SSD1306LVGLDisplay lvgl_display(&display_driver);
 
 static lv_obj_t *init_display()
 {
@@ -27,21 +27,21 @@ static lv_obj_t *init_display()
     lv_obj_t *screen;
 
     // initialize display
-    err = display_dirver.init();
+    err = display_driver.init();
     if (err) {
         MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION, MBED_ERROR_CODE_INITIALIZATION_FAILED), "Fail to initialize display");
     }
 
-    // initialize LittlevGL
-    err = app_littlevlg_init();
+    // initialize LVGL
+    err = app_lvgl_init();
     if (err) {
-        MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION, MBED_ERROR_CODE_INITIALIZATION_FAILED), "Fail to initialize LittlevGL");
+        MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION, MBED_ERROR_CODE_INITIALIZATION_FAILED), "Fail to initialize LVGL");
     }
 
     // initialize display driver
     err = lvgl_display.init();
     if (err) {
-        MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION, MBED_ERROR_CODE_INITIALIZATION_FAILED), "Fail to initialize LittlevGL display driver");
+        MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION, MBED_ERROR_CODE_INITIALIZATION_FAILED), "Fail to initialize LVGL display driver");
     }
 
     screen = lvgl_display.get_screen();
@@ -51,14 +51,14 @@ static lv_obj_t *init_display()
 }
 
 /**
- * Helper class that encapsulates LittlevGL UI.
+ * Helper class that encapsulates LVGL UI.
  */
 class AppScene {
 private:
     bool _init_flag = false;
 
     lv_obj_t *_screen = nullptr;
-    lv_obj_t *_prograss_bar = nullptr;
+    lv_obj_t *_progress_bar = nullptr;
     lv_obj_t *_first_value_label = nullptr;
     char _first_value_text[16];
     char _second_value_text[16];
@@ -81,11 +81,11 @@ public:
         }
 
         // create progress bar
-        _prograss_bar = lv_bar_create(_screen, NULL);
-        lv_bar_set_range(_prograss_bar, 0, 1024);
+        _progress_bar = lv_bar_create(_screen, NULL);
+        lv_bar_set_range(_progress_bar, 0, 1024);
         set_progress(0);
-        lv_obj_set_width_margin(_prograss_bar, lv_obj_get_width_fit(_screen));
-        lv_obj_align(_prograss_bar, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
+        lv_obj_set_width_margin(_progress_bar, lv_obj_get_width_fit(_screen));
+        lv_obj_align(_progress_bar, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
 
         lv_obj_t *name_label;
         // create first label
@@ -108,7 +108,7 @@ public:
 
     int set_progress(float value)
     {
-        lv_bar_set_value(_prograss_bar, lv_bar_get_max_value(_prograss_bar) * value, LV_ANIM_OFF);
+        lv_bar_set_value(_progress_bar, lv_bar_get_max_value(_progress_bar) * value, LV_ANIM_OFF);
         return 0;
     }
 
@@ -192,7 +192,7 @@ int main()
         app_scene.set_first_value(value);
         app_scene.set_second_value(value * 2 - 1.0f);
 
-        app_littlevgl_process_ui();
+        app_lvgl_process_ui();
         ThisThread::sleep_for(20ms);
 
         value += d_value;

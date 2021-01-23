@@ -7,7 +7,7 @@ This library provides simple Mbed OS 6 driver for SSD1306 based OLED displays.
 
 The driver only provides API to flush data from a buffer to a specified display region.
 
-The interface should be drawn with some external libraries like [littelvgl](https://littlevgl.com/) and others.
+The interface should be drawn with some external libraries like [LVGL](https://lvgl.io/) and others.
 
 Display usage examples can be found in the `examples` folder.
 

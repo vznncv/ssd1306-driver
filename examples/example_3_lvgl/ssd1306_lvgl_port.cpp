@@ -6,12 +6,12 @@
 using ssd1306driver::SSD1306DisplayDriver;
 
 //
-// Common LittlevGL initialization functions
+// Common LVGL initialization functions
 //
 
 static bool lvgl_is_initialized = false;
 
-int app_littlevlg_init()
+int app_lvgl_init()
 {
     if (lvgl_is_initialized) {
         return 0;
@@ -21,14 +21,13 @@ int app_littlevlg_init()
     return 0;
 }
 
-int app_littlevgl_process_ui()
+int app_lvgl_process_ui()
 {
-    lv_task_handler();
-    return 0;
+    return (int)lv_task_handler();
 }
 
 //
-// LittlevGL bindings
+// LVGL bindings
 //
 
 static void sdd1306_set_px_cb(lv_disp_drv_t *disp_drv, uint8_t *buf, lv_coord_t buf_w, lv_coord_t x, lv_coord_t y,
@@ -86,7 +85,7 @@ int SSD1306LVGLDisplay::init()
     }
 
     // initialize buffer
-    size_t buf_size = _display_driver->get_width() * _display_driver->get_heigth();
+    size_t buf_size = _display_driver->get_width() * _display_driver->get_height();
     _buf = new uint8_t[buf_size / 8];
     memset(_buf, 0, buf_size / 8);
     lv_disp_buf_init(&_lv_buf, _buf, NULL, buf_size);
@@ -97,7 +96,7 @@ int SSD1306LVGLDisplay::init()
     _lv_drv.user_data = _display_driver;
     _lv_drv.buffer = &_lv_buf;
     _lv_drv.hor_res = _display_driver->get_width();
-    _lv_drv.ver_res = _display_driver->get_heigth();
+    _lv_drv.ver_res = _display_driver->get_height();
     _lv_drv.set_px_cb = sdd1306_set_px_cb;
     _lv_drv.rounder_cb = ssd1306_rounder_cb;
     _lv_disp = lv_disp_drv_register(&_lv_drv);
@@ -120,4 +119,10 @@ lv_obj_t *SSD1306LVGLDisplay::get_screen()
     } else {
         return lv_disp_get_scr_act(_lv_disp);
     }
+}
+
+int app_lvgl_display_ready(lv_disp_t *disp)
+{
+    lv_task_ready(_lv_disp_get_refr_task(disp));
+    return 0;
 }
