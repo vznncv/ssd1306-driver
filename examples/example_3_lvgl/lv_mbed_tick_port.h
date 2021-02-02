@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 /**
- * Mbed system timer wrapper for LittlevGL.
+ * Mbed system timer wrapper for LVGL.
  */
 uint32_t lv_mbed_tick_get();
 

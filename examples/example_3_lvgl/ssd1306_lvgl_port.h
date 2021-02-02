@@ -4,23 +4,33 @@
 #include "ssd1306_driver.h"
 
 /**
- * Common littlevgl initialization function.
+ * Common LVGL initialization function.
  *
  * @return 0 on success, otherwise non-zero value
  */
-int app_littlevlg_init();
+int app_lvgl_init();
 
 /**
- * Littlevgl task/ui handler.
+ * LVGL task/ui handler.
  *
  * This function should be called periodically in the same thread that modifies UI.
  *
- * @return 0 on success, otherwise non-zero value
+ * @return the time after which it must be called again, or negative value in case of error
  */
-int app_littlevgl_process_ui();
+int app_lvgl_process_ui();
 
 /**
- * Helper LittlevGL bindings for SSD1306DisplayDriver driver class.
+ * Force display update with next app_lvgl_process_ui invocation.
+ *
+ * This function is useful if you need to show some information and don't invoke app_lvgl_process_ui during some time.
+ *
+ * @param disp display object
+ * @return 0 on success, otherwise non-zero value
+ */
+int app_lvgl_display_ready(lv_disp_t *disp);
+
+/**
+ * Helper LVGL bindings for SSD1306DisplayDriver driver class.
  */
 class SSD1306LVGLDisplay : NonCopyable<SSD1306LVGLDisplay> {
 private:
@@ -49,14 +59,14 @@ public:
     int init();
 
     /**
-     * Get initialized LittlevGL display structure.
+     * Get initialized LVGL display structure.
      *
      * @return display structure or @c nullptr if display isn't initialized
      */
     lv_disp_t *get_display();
 
     /**
-     * Get screen object of the LittlevGL display.
+     * Get screen object of the LVGL display.
      *
      * @return screen structure or @c nullptr if display isn't initialized
      */
@@ -75,6 +85,6 @@ public:
      */
     inline int get_height() const
     {
-        return _display_driver->get_heigth();
+        return _display_driver->get_height();
     }
 };

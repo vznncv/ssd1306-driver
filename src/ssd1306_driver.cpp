@@ -112,7 +112,7 @@ int SSD1306DisplayInterfaceSPI::write_command_data(const uint8_t *buf, size_t le
     total = _spi->write((const char *)buf, len, nullptr, 0);
     _dc_pin = 1;
     _spi->deselect();
-    return total == len ? 0 : -1;
+    return total == (int)len ? 0 : -1;
 }
 
 int SSD1306DisplayInterfaceSPI::write_gram_data(const uint8_t *buf, size_t len)
@@ -122,7 +122,7 @@ int SSD1306DisplayInterfaceSPI::write_gram_data(const uint8_t *buf, size_t len)
     _dc_pin = 1;
     total = _spi->write((const char *)buf, len, nullptr, 0);
     _spi->deselect();
-    return total == len ? 0 : -1;
+    return total == (int)len ? 0 : -1;
 }
 
 int SSD1306DisplayInterfaceSPI::reset()
@@ -156,7 +156,7 @@ int SSD1306DisplayDriver::get_width() const
     return _width;
 }
 
-int SSD1306DisplayDriver::get_heigth() const
+int SSD1306DisplayDriver::get_height() const
 {
     return _height;
 }
@@ -248,7 +248,7 @@ int SSD1306DisplayDriver::init(bool start)
     return 0;
 }
 
-int SSD1306DisplayDriver::set_constrast(uint8_t value)
+int SSD1306DisplayDriver::set_contrast(uint8_t value)
 {
     const uint8_t cmd_buf[] = {
         CMD_SETCONTRAST,

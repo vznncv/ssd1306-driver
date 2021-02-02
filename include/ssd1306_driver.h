@@ -6,7 +6,7 @@
 namespace ssd1306driver {
 
 /**
- * Helper class to encapsulate communication with SSD1306 dispaly.
+ * Helper class to encapsulate communication with SSD1306 display.
  */
 class SSD1306DisplayInterface : NonCopyable<SSD1306DisplayInterface> {
 
@@ -93,9 +93,9 @@ class SSD1306DisplayInterfaceSPI : public SSD1306DisplayInterface {
 private:
     SPI *_spi;
     bool _cleanup_flag;
-    DigitalOut _reset_pin;
     // note: keep 1 as default dc pin value
     DigitalOut _dc_pin;
+    DigitalOut _reset_pin;
 
     static const int _SPI_FREQ = 8'000'000;
 
@@ -154,10 +154,10 @@ public:
     };
 
     enum CompinLayout : uint8_t {
-        COMPINLAYOUT_SN = 0x02, // sequential layout, normal left-rigth layout
-        COMPINLAYOUT_SI = 0x22, // sequential layout, inversed left-rigth layout
-        COMPINLAYOUT_AN = 0x12, // alternate layout, normal left-rigth layout
-        COMPINLAYOUT_AI = 0x32, // alternate layout, inversed left-rigth layout
+        COMPINLAYOUT_SN = 0x02, // sequential layout, normal left-right layout
+        COMPINLAYOUT_SI = 0x22, // sequential layout, inverse left-right layout
+        COMPINLAYOUT_AN = 0x12, // alternate layout, normal left-right layout
+        COMPINLAYOUT_AI = 0x32, // alternate layout, inverse left-right layout
     };
 
 private:
@@ -170,7 +170,7 @@ public:
      *
      * @param interface interface wrapper
      * @param width display width
-     * @param height display hight. It must be in range [16, 64].
+     * @param height display height. It must be in range [16, 64].
      * @param vcc_mode led panel power source. For most panels `VCC_INTERNAL` is suitable value.
      * @param compin_layout hardware compin connection type. It's should be found in the display module description or you can brut force 4 configurations.
      */
@@ -179,15 +179,25 @@ public:
     ~SSD1306DisplayDriver();
 
     int get_width() const;
-    int get_heigth() const;
+    int get_height() const;
 
     /**
      * Initialize display.
      *
-     * @param start if it's true, then display will be enabled immediaty, otherwise it will be initialize and switched to sleep mode
+     * @param start if it's true, then display will be enabled immediate, otherwise it will be initialize and switched to sleep mode
      * @return 0 on success, otherwise non-zero value
      */
-    int init(bool start = true);
+    int init(bool start);
+
+    /**
+     * Initialize and run display.
+     *
+     * @return 0 on success, otherwise non-zero value
+     */
+    int init()
+    {
+        return init(true);
+    };
 
     /**
      * Set display contrast.
@@ -195,7 +205,7 @@ public:
      * @param value
      * @return 0 on success, otherwise non-zero value
      */
-    int set_constrast(uint8_t value);
+    int set_contrast(uint8_t value);
 
     /**
      * Enable/disable invert mode.
